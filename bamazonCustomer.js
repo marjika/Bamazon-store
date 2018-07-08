@@ -56,22 +56,25 @@ function promptUser() {
 }
 
 function completeOrder(data) {
-    connection.query('SELECT `stock_quantity`, `price` FROM `products` WHERE `item_id`=?', [data.id], function (error, results, fields) {
+    connection.query('SELECT `stock_quantity`, `price`, `product_sales` FROM `products` WHERE `item_id`=?', [data.id], function (error, results, fields) {
         if (error) throw error;
         var inventory = results[0].stock_quantity;
         var price = results[0].price;
-        if (inventory >= data.amount) {
-            var changedQuantity = (inventory-data.amount);
-            connection.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [changedQuantity, data.id], function (error, results, fields) {
+        var changedQuantity = (inventory-data.amount);
+        var customerCost = data.amount * price;
+        var newTotalSales = customerCost + results[0].product_sales;
+        if (inventory >= data.amount) {          
+            connection.query('UPDATE products SET stock_quantity = ?, product_sales = ? WHERE item_id = ?', [changedQuantity, newTotalSales, data.id], function (error, results, fields) {
                 if (error) throw error;
               });
-            console.log("\nYour total price is $" + data.amount * price + ".\n");
+            console.log("\nYour total price is $" + customerCost + ".\n");
+            anotherPrompt();
         }
         else {
-            console.log("\nInsufficient quantity in stock for your purchase.\n")
+            console.log("\nInsufficient quantity in stock for your purchase.\n");
+            anotherPrompt();
         }
-        anotherPrompt();
-    }); 
+    });
 }
 
 function anotherPrompt() {
