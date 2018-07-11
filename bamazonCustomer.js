@@ -17,7 +17,7 @@ function listProducts() {
         console.log("Item ID  Price($) \tProduct");
         console.log("----------------------------------------------")
         for (var i=0; i<results.length; i++) {
-            console.log(results[i].item_id + "\t" + results[i].price + "\t\t" + results[i].product_name);
+            console.log(results[i].item_id + "\t" + results[i].price.toFixed(2) + "\t\t" + results[i].product_name);
         }
         promptUser();
         maxResults = results.length;
@@ -61,7 +61,7 @@ function completeOrder(data) {
         var inventory = results[0].stock_quantity;
         var price = results[0].price;
         var changedQuantity = (inventory-data.amount);
-        var customerCost = data.amount * price;
+        var customerCost = (data.amount * price).toFixed(2);
         var newTotalSales = customerCost + results[0].product_sales;
         if (inventory >= data.amount) {          
             connection.query('UPDATE products SET stock_quantity = ?, product_sales = ? WHERE item_id = ?', [changedQuantity, newTotalSales, data.id], function (error, results, fields) {

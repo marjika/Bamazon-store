@@ -20,7 +20,7 @@ function start() {
         name: "managerInput",
         type: "rawlist",
         message: "\nChoose from the following options.",
-        choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product"]
+        choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product", "Quit"]
       })
       .then(function(selection) {
         if (selection.managerInput === "View Products for Sale") {
@@ -32,8 +32,11 @@ function start() {
         else if (selection.managerInput === "Add to Inventory") {
             addInventory();
         }
-        else {
+        else if (selection.managerInput === "Add New Product") {
             newProduct();
+        }
+        else {
+            connection.end();
         }
       });
   }
@@ -44,7 +47,7 @@ function start() {
         console.log("\nItem ID  Price($)\tUnits \tProduct");
         console.log("--------------------------------------------------------")
         for (var i=0; i<results.length; i++) {
-            console.log(results[i].item_id + "\t " + results[i].price + "\t\t" + results[i].stock_quantity + "\t" + results[i].product_name);
+            console.log(results[i].item_id + "\t " + results[i].price.toFixed(2) + "\t\t" + results[i].stock_quantity + "\t" + results[i].product_name);
         }
         start();
     });
@@ -82,34 +85,30 @@ function start() {
             message: "\nPlease enter the quantity to be added to stock."
         }
     ]).then(function(data) {
-        // connection.query('SELECT `stock_quantity`, `product_name` FROM `products` WHERE `item_id`=?', [data.id], function (error, results, fields) {
-            // if (error) throw error;
-            // var inventory = results[0].stock_quantity;
-                if (data.id <=maxResults && data.id>0 && !isNaN(data.amount)){
-                    connection.query('SELECT `stock_quantity`, `product_name` FROM `products` WHERE `item_id`=?', [data.id], function (error, results, fields) {
-                        if (error) throw error;
-                        var inventory = results[0].stock_quantity;
-                        var changedQuantity = (inventory+parseInt(data.amount));
-                        connection.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [changedQuantity, data.id], function (error, results, fields) {
-                            if (error) throw error;
-                        });
-                      console.log("\nThere are " + changedQuantity + " units in inventory for "+ results[0].product_name + ".\n");
-                      start();
-                    });
-                }
-                else if (isNaN(data.amount)){
-                    console.log("\n*******************************");
-                    console.log("*Please enter a valid quantity.*");
-                    console.log("*********************************\n");
-                    addInventory();
-                }
-                else {
-                    console.log("\n*************************");
-                    console.log("*Please enter a valid id*");
-                    console.log("*************************\n");
-                    addInventory();
-                }
-        // });
+        if (data.id <=maxResults && data.id>0 && !isNaN(data.amount)){
+            connection.query('SELECT `stock_quantity`, `product_name` FROM `products` WHERE `item_id`=?', [data.id], function (error, results, fields) {
+                if (error) throw error;
+                var inventory = results[0].stock_quantity;
+                var changedQuantity = (inventory+parseInt(data.amount));
+                connection.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [changedQuantity, data.id], function (error, results, fields) {
+                    if (error) throw error;
+                });
+                console.log("\nThere are " + changedQuantity + " units in inventory for "+ results[0].product_name + ".\n");
+                start();
+            });
+        }
+        else if (isNaN(data.amount)){
+            console.log("\n*******************************");
+            console.log("*Please enter a valid quantity.*");
+            console.log("*********************************\n");
+            addInventory();
+        }
+        else {
+            console.log("\n*************************");
+            console.log("*Please enter a valid id*");
+            console.log("*************************\n");
+            addInventory();
+        }
     });
   }
 
@@ -147,7 +146,6 @@ function start() {
             function(err) {
               if (err) throw err;
               console.log("Your new product has been added.");
-              // re-prompt the user for if they want to bid or post
               start();
             }
           );
