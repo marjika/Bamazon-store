@@ -1,5 +1,7 @@
 # Bamazon-store
-####MySQL and node program storefront
+
+#### MySQL and node program storefront
+
 This is a Nodejs application with 3 types of functionality, each of which communicates with a mysql database, that holds items in an online store. This application uses inquirer and mysql npm packages.  For the customer functions (bamazonCustomer.js), the user sees a list of items available in the store. The user can choose an item and a quantity, and the application updates (depletes) the purchased items in the database and gives a total to the customer.  The program then updates the total sales, which is an amount used in the supervisor file.
 
 #### Bamazon Customer
